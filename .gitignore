@@ -6,6 +6,22 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
+build/
+dist/
+__pypackages__/
+.uv/
+
+# secrets, never committed
+.env
+.env.*
+*.key
+*.pem
+
+# editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 
 # generated at runtime, never hand-edited
 artifacts/*
