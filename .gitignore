@@ -38,3 +38,9 @@ models_gguf/
 models_onnx/
 *.gguf
 *.onnx
+
+# internal process docs, not part of the public handoff
+/Build_guide.md
+/CLAUDE.md
+/Reporting.md
+/docs/
