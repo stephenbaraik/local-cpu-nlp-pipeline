@@ -25,6 +25,7 @@ whatever's already done. It does not set up GPU support -- see below.
 ```bash
 python -m venv .venv
 .venv\Scripts\activate        # Windows
+source .venv/bin/activate     # macOS / Linux
 pip install -e .
 ```
 
@@ -48,8 +49,28 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
 # must print True -- if it prints False, GPU runs will silently execute on CPU
 ```
 
-Gemma runs through `llama-cpp-python` on the q4_0 QAT GGUF build. Fetch it
-once (~3.3GB, gitignored):
+Gemma runs through `llama-cpp-python` on the q4_0 QAT GGUF build. It's the
+only model this project needs you to fetch manually into a specific
+folder (~3.3GB, gitignored) -- everything else downloads itself on first
+use. Pick the command for your OS, run it from the project root:
+
+**macOS / Linux:**
+
+```bash
+mkdir -p models_gguf
+curl -L -o models_gguf/gemma-4-E2B_q4_0-it.gguf \
+  "https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf"
+```
+
+**Windows (PowerShell):**
+
+```powershell
+New-Item -ItemType Directory -Force -Path models_gguf | Out-Null
+Invoke-WebRequest -Uri "https://huggingface.co/google/gemma-4-E2B-it-qat-q4_0-gguf/resolve/main/gemma-4-E2B_q4_0-it.gguf" -OutFile "models_gguf\gemma-4-E2B_q4_0-it.gguf"
+```
+
+**Any OS, via Python** (resumable if it drops mid-download, unlike the raw
+`curl`/`Invoke-WebRequest` above):
 
 ```bash
 python -c "
@@ -58,8 +79,11 @@ hf_hub_download('google/gemma-4-E2B-it-qat-q4_0-gguf', 'gemma-4-E2B_q4_0-it.gguf
 "
 ```
 
-SecureBERT and ModernBERT download automatically from Hugging Face on first
-use (cached under `~/.cache/huggingface`).
+SecureBERT and ModernBERT (both torch weights and ModernBERT's published
+int8 ONNX build) download automatically from Hugging Face on first use,
+cached under `~/.cache/huggingface` -- no folder to point at, no command
+to run. `models_onnx/securebert.onnx` is the one exception, and it isn't
+downloaded at all -- see the ONNX backend step below.
 
 For the ONNX backend, export SecureBERT once (fp32 -- see
 `src/pipeline/onnx_export.py` for why not int8):
