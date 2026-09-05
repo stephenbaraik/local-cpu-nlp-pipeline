@@ -5,14 +5,9 @@ PDFs into five keyphrases, a topic label, and a one-sentence summary. Built
 for the "Technical Assessment: Local CPU NLP Pipeline" brief, and benchmarked
 against Denzel's single-call LLM pipeline (`denzel code/`).
 
-Docs:
-- [`CLAUDE.md`](CLAUDE.md) -- enforceable project rules (hardware, benchmark
-  protocol, non-negotiables).
-- [`Build_guide.md`](Build_guide.md) -- the reasoning behind those rules.
-- [`Reporting.md`](Reporting.md) -- how results are captured and written up.
-- [`docs/TECHNICAL_REPORT.md`](docs/TECHNICAL_REPORT.md) -- the write-up
-  required by the brief (cleaning strategy, model integration, long-document
-  handling, untrusted-content handling, optimizations, trade-offs).
+Docs: [`docs/TECHNICAL_REPORT.md`](docs/TECHNICAL_REPORT.md) -- the write-up
+required by the brief (cleaning strategy, model integration, long-document
+handling, untrusted-content handling, optimizations, trade-offs).
 
 ## Install
 
@@ -94,11 +89,11 @@ python -m pipeline.onnx_export
 
 ## Verify your setup
 
-Before a full run, confirm the install actually works with one document
-(seconds, not minutes):
+Before the full run, confirm the install actually works with one document
+(seconds, not minutes) -- same flags as the real run below, just one PDF:
 
 ```bash
-python -m pipeline run --doc 035f --force
+python -m pipeline run --match-denzel --protocol A --doc 035f --force
 ```
 
 If that prints a `run_id:` line with no errors, the install is good. If it
@@ -108,33 +103,32 @@ firewall/proxy (SecureBERT and ModernBERT download on first use).
 
 ## Run
 
+Every command below runs the **Denzel-matched Protocol A pipeline** --
+`--match-denzel` reproduces Denzel's page-1-only input, `--protocol A` is
+their single-pass, no-warm-up timing method. This is the only
+configuration this README asks you to run; it's what the results in
+`reports/` are built from.
+
 ```bash
-python -m pipeline run                          # all stages, all PDFs in pdfs/, cached
-python -m pipeline run --force                   # ignore cache, recompute everything
-python -m pipeline run --only clean              # force-recompute clean + everything downstream
-python -m pipeline run --through keywords        # stop after stage 4
-python -m pipeline run --doc 035f --force        # one document, ignore cache
+python -m pipeline run --match-denzel --protocol A --force
+python -m pipeline report                        # writes runs/<run_id>/results.json
+python -m pipeline metrics                        # writes the 3-layer metrics.json + documents.csv / stages.csv
+```
 
-python -m pipeline run --device cuda --dtype fp16   # GPU encoders, fp16
-python -m pipeline run --match-denzel --protocol A  # page-1 gate, matches Denzel's timing method
+`--force` recomputes everything instead of serving a cached artifact --
+a benchmark that times a cache hit is a meaningless number.
 
-python -m pipeline report                        # artifacts/ -> runs/<run_id>/results.json
-python -m pipeline bench                         # per-model timing, cache always off
-python -m pipeline bench --grid                  # thread x worker peak-RSS grid
-python -m pipeline metrics                       # writes the 3-layer run/documents/stages metrics.json + CSVs
-python -m pipeline compare --modes full,page1
-python -m pipeline compare --modes guard-on,guard-off
-python -m pipeline compare --modes torch,onnx
+For a GPU run under the same matched configuration (see the GPU install
+step above first):
+
+```bash
+python -m pipeline run --match-denzel --protocol A --force --device cuda --dtype fp16
+python -m pipeline report
+python -m pipeline metrics
 ```
 
 Put PDFs in `pdfs/` (already populated with the assessment's 15-document
-corpus). Config is defaults plus `NLP_*` environment variables -- see
-`src/pipeline/config.py` for the full list (`NLP_MAX_PAGES`,
-`NLP_INJECTION_GUARD`, `NLP_BACKEND`, `NLP_DEVICE`, `NLP_DTYPE`,
-`NLP_CPU_THREADS`, `NLP_BATCH_SIZE`, ...). Hardware flags on `run` and `bench`
-(`--device`, `--dtype`, `--threads`, `--batch-size`, `--protocol`,
-`--taxonomy`, `--match-denzel`, `--injection-check`) set the matching env var
-before the run starts -- see `src/pipeline/__main__.py`.
+corpus).
 
 ## Test
 
@@ -145,13 +139,12 @@ pytest tests                  # full suite, real models, several minutes
 
 ## Results
 
-`python -m pipeline run --force && python -m pipeline report` writes the
-assessment's required results file to `runs/<run_id>/results.json`: per
-document, accepted/rejected status, rejection reason, top-5 keyphrases,
-predicted label + confidence, generated summary, and the run's full config.
+`python -m pipeline report` (after the `run` above) writes the assessment's
+required results file to `runs/<run_id>/results.json`: per document,
+accepted/rejected status, rejection reason, top-5 keyphrases, predicted
+label + confidence, generated summary, and the run's full config.
 
-`python -m pipeline bench` writes `runs/<run_id>/benchmark.json` (init vs.
-inference timing, peak RSS, environment + library versions).
 `python -m pipeline metrics` writes the three-layer `metrics.json` plus
-`documents.csv` / `stages.csv` used for the CPU/GPU benchmark comparison.
-Generated reports (CSVs, the benchmark presentation) live under `reports/`.
+`documents.csv` / `stages.csv` -- the same files behind the CSVs already in
+`reports/cpu/` and `reports/gpu/`. Generated reports (CSVs, the benchmark
+presentation) live under `reports/`.
