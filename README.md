@@ -5,10 +5,6 @@ PDFs into five keyphrases, a topic label, and a one-sentence summary. Built
 for the "Technical Assessment: Local CPU NLP Pipeline" brief, and benchmarked
 against Denzel's single-call LLM pipeline (`denzel code/`).
 
-Docs: [`docs/TECHNICAL_REPORT.md`](docs/TECHNICAL_REPORT.md) -- the write-up
-required by the brief (cleaning strategy, model integration, long-document
-handling, untrusted-content handling, optimizations, trade-offs).
-
 ## Install
 
 **One command (Windows):** `.\setup.ps1` -- creates the venv, installs, downloads

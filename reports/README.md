@@ -83,9 +83,8 @@ time goes within a document rather than just the total -- e.g. the
 classification stage (ModernBERT-large zero-shot, one forward pass per
 candidate label) is consistently the largest single cost, which is the
 finding on the "Where the time goes" slide in the deck. Those per-stage
-numbers are Protocol B (see `docs/TECHNICAL_REPORT.md` section 8) -- a
-different, separately-labeled measurement from the head-to-head table above,
-by design.
+numbers are Protocol B -- a different, separately-labeled measurement from
+the head-to-head table above, by design.
 
 ## Still missing
 
@@ -103,7 +102,6 @@ Then rename the output the same way as the files above
 
 ## Source of truth
 
-`docs/TECHNICAL_REPORT.md` has the full write-up (cleaning strategy, model
-integration, optimizations, and every number's context). `Reporting.md` at
-the project root has the rule this folder follows: every number must trace
-to a file here, and every file must trace to a reproducible command.
+`Reporting.md` at the project root has the rule this folder follows: every
+number must trace to a file here, and every file must trace to a
+reproducible command.
