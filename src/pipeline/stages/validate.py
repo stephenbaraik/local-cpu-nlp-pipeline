@@ -17,9 +17,6 @@ FAILURE_SIGNAL_PHRASES = (
     "sorry, you have been blocked",
 )
 
-# The team's pipeline reads only page one; 120 words is the line below which
-# a first page is legitimately too short to summarize (see phase 3 gate).
-MIN_CONTENT_WORDS = 120
 MIN_UNIQUE_WORD_RATIO = 0.3
 
 
@@ -40,7 +37,7 @@ class ValidateStage:
     name: str = "validate"
     version: str = "1"
     depends_on: tuple[str, ...] = ("clean",)
-    config_keys: tuple[str, ...] = ()
+    config_keys: tuple[str, ...] = ("MIN_WORDS", "MIN_CHARS")
 
     def run(self, doc: DocContext) -> dict:
         body = doc.payloads["clean"]["body"]
@@ -51,6 +48,7 @@ class ValidateStage:
 
         signals = {
             "content_words": content_words,
+            "content_chars": len(body.strip()),
             "failure_signal": failure_signal,
             "unique_word_ratio": round(unique_word_ratio, 4),
         }
@@ -63,7 +61,11 @@ class ValidateStage:
         if content_words > 0 and unique_word_ratio < MIN_UNIQUE_WORD_RATIO:
             return {"status": "rejected", "reason": "low_unique_word_ratio", "signals": signals}
         # Rule 3: genuinely too short to be real content.
-        if content_words < MIN_CONTENT_WORDS:
+        if content_words < doc.config.min_words:
+            return {"status": "rejected", "reason": "too_short", "signals": signals}
+        # Rule 4: off by default (min_chars=0); --match-denzel sets 100 to
+        # reproduce their effective min_chars=100/min_words=20 first-page gate.
+        if doc.config.min_chars > 0 and signals["content_chars"] < doc.config.min_chars:
             return {"status": "rejected", "reason": "too_short", "signals": signals}
 
         return {"status": "accepted", "reason": None, "signals": signals}

@@ -110,6 +110,8 @@ def save(
     duration_s: float,
     status: str = "ok",
     error: str | None = None,
+    peak_ram_mb: float | None = None,
+    peak_vram_mb: float | None = None,
 ) -> dict:
     envelope: dict[str, Any] = {
         "stage": stage,
@@ -121,6 +123,8 @@ def save(
         "code_fingerprint": code_fingerprint,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "duration_s": duration_s,
+        "peak_ram_mb": peak_ram_mb,
+        "peak_vram_mb": peak_vram_mb,
         "payload": payload,
     }
     if error is not None:
@@ -129,6 +133,37 @@ def save(
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(envelope, indent=2, sort_keys=True))
     return envelope
+
+
+def snapshot_timings(doc_ids: list[str], stage_names: list[str]) -> dict[tuple[str, str], tuple]:
+    """(duration_s, peak_ram_mb, peak_vram_mb) per (doc_id, stage) as currently
+    on disk. Protocol B calls this right after each timed pass, before the
+    next pass overwrites these same files."""
+    out: dict[tuple[str, str], tuple] = {}
+    for doc_id in doc_ids:
+        for stage in stage_names:
+            envelope = load(doc_id, stage)
+            if envelope is None:
+                continue
+            out[(doc_id, stage)] = (
+                envelope["duration_s"],
+                envelope.get("peak_ram_mb"),
+                envelope.get("peak_vram_mb"),
+            )
+    return out
+
+
+def apply_timing(doc_id: str, stage: str, duration_s: float, peak_ram_mb: float | None, peak_vram_mb: float | None) -> None:
+    """Patches only the timing fields of an already-saved envelope in place.
+    Protocol B uses this to replace a single pass's numbers with the
+    3-run median, without touching the payload or fingerprints."""
+    envelope = load(doc_id, stage)
+    if envelope is None:
+        return
+    envelope["duration_s"] = duration_s
+    envelope["peak_ram_mb"] = peak_ram_mb
+    envelope["peak_vram_mb"] = peak_vram_mb
+    artifact_path(doc_id, stage).write_text(json.dumps(envelope, indent=2, sort_keys=True))
 
 
 def update_index(doc_id: str, source_path: Path, page_count: int, status: str) -> None:

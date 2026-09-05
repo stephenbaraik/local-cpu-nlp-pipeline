@@ -61,10 +61,15 @@ def _doc_entry(run_id: str, doc_id: str, index_entry: dict) -> dict:
         entry["keywords"] = ok_payloads["keywords"]["keywords"]
 
     if "classify" in ok_payloads:
-        entry["predicted_label"] = ok_payloads["classify"]["predicted_label"]
-        entry["confidence"] = ok_payloads["classify"]["confidence"]
-        entry["label_scores"] = ok_payloads["classify"]["label_scores"]
-        entry["n_windows"] = ok_payloads["classify"]["n_windows"]
+        c = ok_payloads["classify"]
+        entry["predicted_label"] = c["predicted_label"]
+        entry["confidence"] = c["confidence"]
+        entry["label_scores"] = c["label_scores"]
+        entry["n_windows"] = c["n_windows"]
+        if "denzel_flags" in c:
+            entry["denzel_flags"] = c["denzel_flags"]
+            entry["denzel_scores"] = c["denzel_scores"]
+            entry["sectors"] = c["sectors"]
 
     if "context" in ok_payloads:
         entry["reduced_context_chars"] = ok_payloads["context"]["reduced_context_chars"]
@@ -93,7 +98,6 @@ def build_results(run_id: str | None = None) -> dict:
 
     run_block = {
         "run_id": run_id,
-        # placeholder label until phase 3 defines the real mode/compare taxonomy
         "mode": f"{config.backend}-{config.device}",
         "backend": config.backend,
         "device": config.device,

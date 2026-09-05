@@ -3,26 +3,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-import spacy
-
+from pipeline.chunking import sentences as _sentences
 from pipeline.stages import DocContext, register
-
-_NLP = None
-
-
-def _get_nlp():
-    global _NLP
-    if _NLP is None:
-        _NLP = spacy.blank("en")
-        _NLP.add_pipe("sentencizer")
-    return _NLP
-
-
-def _sentences(text: str) -> list[str]:
-    if not text.strip():
-        return []
-    doc = _get_nlp()(text)
-    return [s.text.strip() for s in doc.sents if s.text.strip()]
 
 
 def _keyword_pattern(keywords: list[str]) -> re.Pattern | None:

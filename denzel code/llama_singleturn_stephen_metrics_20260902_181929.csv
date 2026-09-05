@@ -1,0 +1,6 @@
+pdf_id,pdf_name,rejected,reject_reason,injection_llm_flag,single_turn_time_sec,extraction_time_sec,total_time_sec,extracted_chars,extracted_words
+0,https%3A%2F%2Fawww.anthropic.com%2Fresearch%2Fmany-shot-jailbreaking,False,,False,5.3697,0.1476,5.5194,9885,1541
+1,https%3A%2F%2Fawww.crowdstrike.com%2Fen-us%2Fblog%2Fcrowdstrike-to-acquire-sgnl%2F,False,,False,4.9504,0.1493,5.1009,8944,1217
+2,https%3A%2F%2Fblog.freshfields.us%2Fpost%2F102lzgo%2Fai-supply-chain-and-security-congress-mandates-strict-controls-for-ai-acquired-b,False,,False,5.2303,0.1384,5.3703,9038,1322
+3,https%3A%2F%2Fblogs.nvidia.com%2Fblog%2Fbluefield-cybersecurity-acceleration-enterprise-ai-factory-validated-design%2F,False,,False,4.398,0.18,4.5793,7559,1074
+4,https%3A%2F%2Fbwawww.testing,False,,False,3.3104,0.409,3.7204,3415,520

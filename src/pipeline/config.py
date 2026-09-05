@@ -26,17 +26,29 @@ class Config:
     """Resolved run configuration. Every field here is one NLP_<FIELD> env var."""
 
     max_pages: int = 0
-    injection_guard: bool = True
+    injection_guard: bool = False  # CLAUDE.md: code stays, cost off benchmark runs by default
     backend: str = "torch"
     device: str = "cpu"
+    dtype: str = "fp32"
     onnx_provider: str = "CPUExecutionProvider"
     attn_impl: str = "sdpa"
     cpu_threads: int = 1
     workers: int = 1
+    batch_size: int = 1  # recorded in the run header; no stage batches across documents yet
     summary_max_new_tokens: int = 64
     reduced_context_chars: int = 2000
     gemma_gguf: str = "models_gguf/gemma-4-E2B_q4_0-it.gguf"
     zeroshot_max_chunks: int = 3
+    min_words: int = 120  # validate stage: "too_short" floor
+    min_chars: int = 0  # validate stage: 0 disables the check; --match-denzel sets 100
+    protocol: str = "A"  # A: single pass, no warm-up (matches Denzel). B: 1 warm-up + 3 timed, median.
+    taxonomy: str = "both"  # assessment | denzel | both
+    # Matches transformers' own ZeroShotClassificationPipeline default (what
+    # the torch path already used implicitly). onnx_zero_shot previously
+    # hardcoded "This example is about {}." instead -- a latent mismatch
+    # between backends that this field removes. Wording measurably changes
+    # accuracy (CLAUDE.md), so it is config, not a constant.
+    hypothesis_template: str = "This example is {}."
 
 
 def load_config(env: dict[str, str] | None = None) -> Config:

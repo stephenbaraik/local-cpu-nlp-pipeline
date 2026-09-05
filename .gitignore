@@ -22,6 +22,10 @@ __pypackages__/
 .idea/
 .DS_Store
 Thumbs.db
+.impeccable/
+
+# scratch data dumped mid-session, never a deliverable
+scratchpad_*.json
 
 # generated at runtime, never hand-edited
 artifacts/*
@@ -29,6 +33,8 @@ artifacts/*
 runs/*
 !runs/.gitkeep
 
-# model weights, downloaded not committed
+# model weights, downloaded/exported not committed
 models_gguf/
+models_onnx/
 *.gguf
+*.onnx
